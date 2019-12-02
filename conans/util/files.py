@@ -166,7 +166,7 @@ def save_append(path, content, encoding="utf-8"):
         handle.write(to_file_bytes(content, encoding=encoding))
 
 
-def save(path, content, only_if_modified=False, encoding="utf-8"):
+def save(path, content, only_if_modified=False, encoding="utf-8", mode=None):
     """
     Saves a file with given content
     Params:
@@ -174,6 +174,7 @@ def save(path, content, only_if_modified=False, encoding="utf-8"):
         content: contents to save in the file
         only_if_modified: file won't be modified if the content hasn't changed
         encoding: target file text encoding
+        mode: target file mode (os.chmod compatible)
     """
     try:
         os.makedirs(os.path.dirname(path))
@@ -189,6 +190,13 @@ def save(path, content, only_if_modified=False, encoding="utf-8"):
 
     with open(path, "wb") as handle:
         handle.write(new_content)
+
+    try:
+        if mode is not None:
+            os.chmod(path, mode)
+    except AttributeError:
+        # Allow it to fail when os.chmod is not available
+        pass
 
 
 def mkdir_tmp():

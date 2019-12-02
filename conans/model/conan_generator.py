@@ -40,3 +40,7 @@ class Generator(object):
     @abstractproperty
     def filename(self):
         raise NotImplementedError()
+
+    @property
+    def file_permissions(self):
+        return None

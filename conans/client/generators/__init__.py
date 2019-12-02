@@ -102,18 +102,24 @@ def write_generators(conanfile, path, output):
         try:
             generator.output_path = path
             content = generator.content
+            permissions = generator.file_permissions
             if isinstance(content, dict):
                 if generator.filename:
                     output.warn("Generator %s is multifile. Property 'filename' not used"
                                 % (generator_name,))
                 for k, v in content.items():
                     v = normalize(v)
+                    mode = permissions.get(k, None) if permissions is not None else None
                     output.info("Generator %s created %s" % (generator_name, k))
-                    save(join(path, k), v, only_if_modified=True)
+                    save(join(path, k), v, only_if_modified=True, mode=mode)
             else:
                 content = normalize(content)
                 output.info("Generator %s created %s" % (generator_name, generator.filename))
-                save(join(path, generator.filename), content, only_if_modified=True)
+                if isinstance(permissions, dict):
+                    output.error("Generator %s(file:%s) failed: file_permissions should return a dict\n"
+                                 "only when content returns once"
+                                 % (generator_name, generator.filename))
+                save(join(path, generator.filename), content, only_if_modified=True, mode=permissions)
         except Exception as e:
             if get_env("CONAN_VERBOSE_TRACEBACK", False):
                 output.error(traceback.format_exc())
